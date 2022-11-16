@@ -7079,8 +7079,10 @@ async function lernaRelease(path, release, publish, message, env = {}) {
             'from-package',
             '--yes',
             '--canary',
-            '--preid test',
-            '--pre-dist-tag test',
+            '--preid',
+            'test',
+            '--pre-dist-tag',
+            'test',
             '--registry',
             env.NPM_CONFIG_REGISTRY
         ], {
