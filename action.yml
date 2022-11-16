@@ -1,6 +1,6 @@
-name: Release Action
+name: Release Action Updated
 description: GitHub Action to automatically release packages using lerna or semantic-release
-author: juliendargelos
+author: remixie
 inputs:
   github_token:
     description: GitHub Token used to create the release on GitHub and publish on GitHub registry.
