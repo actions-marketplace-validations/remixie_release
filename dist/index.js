@@ -7071,23 +7071,25 @@ async function npmConfig(registryUrl, token, message) {
 })();
 async function lernaRelease(path, release, publish, message, env = {}) {
     if (release) {
+        await exec.exec('node', [
+            path,
+            'version',
+            '--yes',
+            '--conventional-commits',
+            '--conventional-prerelease'
+        ], { env });
     }
     if (publish) {
         const npmEnv = await npmConfig(env.NPM_CONFIG_REGISTRY, env.NPM_TOKEN, message);
-        await exec.exec("node", [
+        await exec.exec('node', [
             path,
-            "publish",
-            "from-package",
-            "--yes",
-            "--registry",
-            env.NPM_CONFIG_REGISTRY,
-            "--canary",
-            "--preid",
-            "test",
-            "--pre-dist-tag",
-            "test",
+            'publish',
+            'from-package',
+            '--yes',
+            '--registry',
+            env.NPM_CONFIG_REGISTRY
         ], {
-            env: { ...env, ...npmEnv },
+            env: { ...env, ...npmEnv }
         });
     }
 }

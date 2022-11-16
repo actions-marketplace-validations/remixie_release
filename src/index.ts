@@ -124,6 +124,13 @@ async function lernaRelease(
   env: { [variable: string]: string } = {}
 ): Promise<void> {
   if (release) {
+    await exec.exec('node', [
+      path,
+      'version',
+      '--yes',
+      '--conventional-commits',
+      '--conventional-prerelease'
+    ], { env })
   }
 
   if (publish) {
@@ -131,27 +138,18 @@ async function lernaRelease(
       env.NPM_CONFIG_REGISTRY,
       env.NPM_TOKEN,
       message
-    );
+    )
 
-    await exec.exec(
-      "node",
-      [
-        path,
-        "publish",
-        "from-package",
-        "--yes",
-        "--registry",
-        env.NPM_CONFIG_REGISTRY,
-        "--canary",
-        "--preid",
-        "test",
-        "--pre-dist-tag",
-        "test",
-      ],
-      {
-        env: { ...env, ...npmEnv },
-      }
-    );
+    await exec.exec('node', [
+      path,
+      'publish',
+      'from-package',
+      '--yes',
+      '--registry',
+      env.NPM_CONFIG_REGISTRY
+    ], {
+      env: { ...env, ...npmEnv }
+    })
   }
 }
 
