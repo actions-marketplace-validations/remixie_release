@@ -7095,7 +7095,6 @@ async function lernaRelease(path, release, publish, message, env = {}) {
             'version',
             '--yes',
             '--conventional-commits',
-            '--conventional-graduate'
         ], { env });
     }
     if (publish) {

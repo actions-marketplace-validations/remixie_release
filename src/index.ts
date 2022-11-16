@@ -170,7 +170,6 @@ async function lernaRelease(
       'version',
       '--yes',
       '--conventional-commits',
-      '--conventional-graduate'
     ], { env })
   }
 
