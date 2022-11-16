@@ -6994,7 +6994,6 @@ async function npmConfig(registryUrl, token, message) {
     try {
         const owner = github.context.repo.owner;
         const ownerScope = `@${owner}`;
-        const npmToken = core.getInput('npm_token');
         const githubToken = core.getInput('github_token', { required: true });
         const publish = core.getInput('publish') !== 'false';
         const push = core.getInput('push') !== 'false';
@@ -7002,8 +7001,6 @@ async function npmConfig(registryUrl, token, message) {
         const email = core.getInput('email');
         const message = core.getInput('message');
         let publishToGithub;
-        //let publishToNPM: boolean
-        //let privatePackage: boolean
         let scope;
         let cli;
         let cliPath;
@@ -7021,27 +7018,18 @@ async function npmConfig(registryUrl, token, message) {
         }
         try {
             const pkg = JSON.parse((await external_fs_.promises.readFile('package.json')).toString());
-            //privatePackage = cli !== 'lerna' && pkg.private
             scope = pkg.name.slice(0, pkg.name.indexOf('/'));
-            publishToGithub = publish; //&& scope === ownerScope
-            //publishToNPM = publish && !!npmToken
+            publishToGithub = publish && scope === ownerScope;
         }
         catch (_) {
-            //privatePackage = true
             scope = ownerScope;
-            //publishToGithub = false
-            //publishToNPM = false
+            publishToGithub = false;
         }
         if (!publish) {
             core.info('Publishing disabled, skipping publishing to package registries');
-        } /*else if (privatePackage) {
-          core.info(
-            'Private package detected, skipping publishing to package registries'
-          )
-        }*/
+        }
         else {
             scope !== ownerScope && core.warning(`Package not scoped with ${ownerScope}, skipping publishing to GitHub registry`);
-            !npmToken && core.warning('NPM token not provided, skipping publishing to NPM registry');
         }
         try {
             await external_fs_.promises.access(`node_modules/${cli}/package.json`);
@@ -7070,19 +7058,6 @@ async function npmConfig(registryUrl, token, message) {
         });
         core.info('Release available on GitHub');
         publishToGithub && core.info('Package available on GitHub registry');
-        /*publishToNPM && core.info(
-          'Publishing to NPM registry...'
-        )*/
-        /*await release(cliPath, false, publishToNPM, message, {
-          ...process.env,
-          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org',
-          NPM_TOKEN: npmToken,
-          GITHUB_TOKEN: githubToken
-        })
-    
-        publishToNPM && core.info(
-          'Package available on NPM registry'
-        )*/
         if (push) {
             core.info('Pushing changes to GitHub repository...');
             await exec.exec('git', ['push']);
@@ -7095,12 +7070,6 @@ async function npmConfig(registryUrl, token, message) {
 })();
 async function lernaRelease(path, release, publish, message, env = {}) {
     if (release) {
-        await exec.exec('node', [
-            path,
-            'version',
-            '--yes',
-            '--conventional-commits',
-        ], { env });
     }
     if (publish) {
         const npmEnv = await npmConfig(env.NPM_CONFIG_REGISTRY, env.NPM_TOKEN, message);
@@ -7109,6 +7078,9 @@ async function lernaRelease(path, release, publish, message, env = {}) {
             'publish',
             'from-package',
             '--yes',
+            '--canary',
+            '--preid test',
+            '--pre-dist-tag test',
             '--registry',
             env.NPM_CONFIG_REGISTRY
         ], {

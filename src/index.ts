@@ -9,7 +9,6 @@ import { npmConfig } from './npm-config'
   try {
     const owner: string = github.context.repo.owner
     const ownerScope: string = `@${owner}`
-    const npmToken: string = core.getInput('npm_token')
     const githubToken: string = core.getInput('github_token', { required: true })
     const publish: boolean = core.getInput('publish') !== 'false'
     const push: boolean = core.getInput('push') !== 'false'
@@ -18,8 +17,6 @@ import { npmConfig } from './npm-config'
     const message: string = core.getInput('message')
 
     let publishToGithub: boolean
-    //let publishToNPM: boolean
-    //let privatePackage: boolean
     let scope: string
     let cli: string
     let cliPath: string
@@ -50,33 +47,21 @@ import { npmConfig } from './npm-config'
 
     try {
       const pkg = JSON.parse((await fs.readFile('package.json')).toString())
-      //privatePackage = cli !== 'lerna' && pkg.private
       scope = pkg.name.slice(0, pkg.name.indexOf('/'))
-      publishToGithub = publish //&& scope === ownerScope
-      //publishToNPM = publish && !!npmToken
+      publishToGithub = publish && scope === ownerScope
     } catch (_) {
-      //privatePackage = true
       scope = ownerScope
-      //publishToGithub = false
-      //publishToNPM = false
+      publishToGithub = false
     }
 
     if (!publish) {
       core.info(
         'Publishing disabled, skipping publishing to package registries'
       )
-    } /*else if (privatePackage) {
-      core.info(
-        'Private package detected, skipping publishing to package registries'
-      )
-    }*/ 
+    }
     else {
       scope !== ownerScope && core.warning(
         `Package not scoped with ${ownerScope}, skipping publishing to GitHub registry`
-      )
-
-      !npmToken && core.warning(
-        'NPM token not provided, skipping publishing to NPM registry'
       )
     }
 
@@ -126,21 +111,6 @@ import { npmConfig } from './npm-config'
       'Package available on GitHub registry'
     )
 
-    /*publishToNPM && core.info(
-      'Publishing to NPM registry...'
-    )*/
-
-    /*await release(cliPath, false, publishToNPM, message, {
-      ...process.env,
-      NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org',
-      NPM_TOKEN: npmToken,
-      GITHUB_TOKEN: githubToken
-    })
-
-    publishToNPM && core.info(
-      'Package available on NPM registry'
-    )*/
-
     if (push) {
       core.info(
         'Pushing changes to GitHub repository...'
@@ -165,12 +135,6 @@ async function lernaRelease(
   env: { [variable: string]: string } = {}
 ): Promise<void> {
   if (release) {
-    await exec.exec('node', [
-      path,
-      'version',
-      '--yes',
-      '--conventional-commits',
-    ], { env })
   }
 
   if (publish) {
@@ -185,6 +149,9 @@ async function lernaRelease(
       'publish',
       'from-package',
       '--yes',
+      '--canary',
+      '--preid test',
+      '--pre-dist-tag test',
       '--registry',
       env.NPM_CONFIG_REGISTRY
     ], {
