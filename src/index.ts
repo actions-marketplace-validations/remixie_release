@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as github from '@actions/github'
+
 import { promises as fs } from 'fs'
 import { npmConfig } from './npm-config'
 
@@ -18,7 +19,7 @@ import { npmConfig } from './npm-config'
 
     let publishToGithub: boolean
     let publishToNPM: boolean
-    let privatePackage: boolean
+    //let privatePackage: boolean
     let scope: string
     let cli: string
     let cliPath: string
@@ -49,12 +50,12 @@ import { npmConfig } from './npm-config'
 
     try {
       const pkg = JSON.parse((await fs.readFile('package.json')).toString())
-      privatePackage = cli !== 'lerna' && pkg.private
+      //privatePackage = cli !== 'lerna' && pkg.private
       scope = pkg.name.slice(0, pkg.name.indexOf('/'))
-      publishToGithub = publish && !privatePackage && scope === ownerScope
-      publishToNPM = publish && !privatePackage && !!npmToken
+      publishToGithub = publish && scope === ownerScope
+      publishToNPM = publish && !!npmToken
     } catch (_) {
-      privatePackage = true
+      //privatePackage = true
       scope = ownerScope
       publishToGithub = false
       publishToNPM = false
@@ -64,11 +65,12 @@ import { npmConfig } from './npm-config'
       core.info(
         'Publishing disabled, skipping publishing to package registries'
       )
-    } else if (privatePackage) {
+    } /*else if (privatePackage) {
       core.info(
         'Private package detected, skipping publishing to package registries'
       )
-    } else {
+    }*/ 
+    else {
       scope !== ownerScope && core.warning(
         `Package not scoped with ${ownerScope}, skipping publishing to GitHub registry`
       )

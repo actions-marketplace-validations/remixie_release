@@ -7003,7 +7003,7 @@ async function npmConfig(registryUrl, token, message) {
         const message = core.getInput('message');
         let publishToGithub;
         let publishToNPM;
-        let privatePackage;
+        //let privatePackage: boolean
         let scope;
         let cli;
         let cliPath;
@@ -7021,23 +7021,24 @@ async function npmConfig(registryUrl, token, message) {
         }
         try {
             const pkg = JSON.parse((await external_fs_.promises.readFile('package.json')).toString());
-            privatePackage = cli !== 'lerna' && pkg.private;
+            //privatePackage = cli !== 'lerna' && pkg.private
             scope = pkg.name.slice(0, pkg.name.indexOf('/'));
-            publishToGithub = publish && !privatePackage && scope === ownerScope;
-            publishToNPM = publish && !privatePackage && !!npmToken;
+            publishToGithub = publish && scope === ownerScope;
+            publishToNPM = publish && !!npmToken;
         }
         catch (_) {
-            privatePackage = true;
+            //privatePackage = true
             scope = ownerScope;
             publishToGithub = false;
             publishToNPM = false;
         }
         if (!publish) {
             core.info('Publishing disabled, skipping publishing to package registries');
-        }
-        else if (privatePackage) {
-            core.info('Private package detected, skipping publishing to package registries');
-        }
+        } /*else if (privatePackage) {
+          core.info(
+            'Private package detected, skipping publishing to package registries'
+          )
+        }*/
         else {
             scope !== ownerScope && core.warning(`Package not scoped with ${ownerScope}, skipping publishing to GitHub registry`);
             !npmToken && core.warning('NPM token not provided, skipping publishing to NPM registry');
