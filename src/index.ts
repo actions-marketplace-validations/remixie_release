@@ -52,12 +52,12 @@ import { npmConfig } from './npm-config'
       const pkg = JSON.parse((await fs.readFile('package.json')).toString())
       //privatePackage = cli !== 'lerna' && pkg.private
       scope = pkg.name.slice(0, pkg.name.indexOf('/'))
-      publishToGithub = publish && scope === ownerScope
+      publishToGithub = publish //&& scope === ownerScope
       //publishToNPM = publish && !!npmToken
     } catch (_) {
       //privatePackage = true
       scope = ownerScope
-      publishToGithub = false
+      //publishToGithub = false
       //publishToNPM = false
     }
 
