@@ -18,7 +18,7 @@ import { npmConfig } from './npm-config'
     const message: string = core.getInput('message')
 
     let publishToGithub: boolean
-    let publishToNPM: boolean
+    //let publishToNPM: boolean
     //let privatePackage: boolean
     let scope: string
     let cli: string
@@ -53,12 +53,12 @@ import { npmConfig } from './npm-config'
       //privatePackage = cli !== 'lerna' && pkg.private
       scope = pkg.name.slice(0, pkg.name.indexOf('/'))
       publishToGithub = publish && scope === ownerScope
-      publishToNPM = publish && !!npmToken
+      //publishToNPM = publish && !!npmToken
     } catch (_) {
       //privatePackage = true
       scope = ownerScope
       publishToGithub = false
-      publishToNPM = false
+      //publishToNPM = false
     }
 
     if (!publish) {
@@ -126,11 +126,11 @@ import { npmConfig } from './npm-config'
       'Package available on GitHub registry'
     )
 
-    publishToNPM && core.info(
+    /*publishToNPM && core.info(
       'Publishing to NPM registry...'
-    )
+    )*/
 
-    await release(cliPath, false, publishToNPM, message, {
+    /*await release(cliPath, false, publishToNPM, message, {
       ...process.env,
       NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org',
       NPM_TOKEN: npmToken,
@@ -139,7 +139,7 @@ import { npmConfig } from './npm-config'
 
     publishToNPM && core.info(
       'Package available on NPM registry'
-    )
+    )*/
 
     if (push) {
       core.info(

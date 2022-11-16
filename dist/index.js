@@ -7002,7 +7002,7 @@ async function npmConfig(registryUrl, token, message) {
         const email = core.getInput('email');
         const message = core.getInput('message');
         let publishToGithub;
-        let publishToNPM;
+        //let publishToNPM: boolean
         //let privatePackage: boolean
         let scope;
         let cli;
@@ -7024,13 +7024,13 @@ async function npmConfig(registryUrl, token, message) {
             //privatePackage = cli !== 'lerna' && pkg.private
             scope = pkg.name.slice(0, pkg.name.indexOf('/'));
             publishToGithub = publish && scope === ownerScope;
-            publishToNPM = publish && !!npmToken;
+            //publishToNPM = publish && !!npmToken
         }
         catch (_) {
             //privatePackage = true
             scope = ownerScope;
             publishToGithub = false;
-            publishToNPM = false;
+            //publishToNPM = false
         }
         if (!publish) {
             core.info('Publishing disabled, skipping publishing to package registries');
@@ -7070,14 +7070,19 @@ async function npmConfig(registryUrl, token, message) {
         });
         core.info('Release available on GitHub');
         publishToGithub && core.info('Package available on GitHub registry');
-        publishToNPM && core.info('Publishing to NPM registry...');
-        await release(cliPath, false, publishToNPM, message, {
-            ...process.env,
-            NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org',
-            NPM_TOKEN: npmToken,
-            GITHUB_TOKEN: githubToken
-        });
-        publishToNPM && core.info('Package available on NPM registry');
+        /*publishToNPM && core.info(
+          'Publishing to NPM registry...'
+        )*/
+        /*await release(cliPath, false, publishToNPM, message, {
+          ...process.env,
+          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org',
+          NPM_TOKEN: npmToken,
+          GITHUB_TOKEN: githubToken
+        })
+    
+        publishToNPM && core.info(
+          'Package available on NPM registry'
+        )*/
         if (push) {
             core.info('Pushing changes to GitHub repository...');
             await exec.exec('git', ['push']);
