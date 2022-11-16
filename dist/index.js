@@ -6994,31 +6994,33 @@ async function npmConfig(registryUrl, token, message) {
     try {
         const owner = github.context.repo.owner;
         const ownerScope = `@${owner}`;
-        const githubToken = core.getInput('github_token', { required: true });
-        const publish = core.getInput('publish') !== 'false';
-        const push = core.getInput('push') !== 'false';
-        const name = core.getInput('name');
-        const email = core.getInput('email');
-        const message = core.getInput('message');
+        const githubToken = core.getInput("github_token", {
+            required: true,
+        });
+        const publish = core.getInput("publish") !== "false";
+        const push = core.getInput("push") !== "false";
+        const name = core.getInput("name");
+        const email = core.getInput("email");
+        const message = core.getInput("message");
         let publishToGithub;
         let scope;
         let cli;
         let cliPath;
         let release;
         try {
-            await external_fs_.promises.access('lerna.json');
-            cli = 'lerna';
+            await external_fs_.promises.access("lerna.json");
+            cli = "lerna";
             release = lernaRelease;
-            core.info('Lerna detected, releasing using lerna');
+            core.info("Lerna detected, releasing using lerna");
         }
         catch (_) {
-            cli = 'semantic-release';
+            cli = "semantic-release";
             release = semanticRelease;
-            core.info('Lerna not detected, releasing using semantic-release');
+            core.info("Lerna not detected, releasing using semantic-release");
         }
         try {
-            const pkg = JSON.parse((await external_fs_.promises.readFile('package.json')).toString());
-            scope = pkg.name.slice(0, pkg.name.indexOf('/'));
+            const pkg = JSON.parse((await external_fs_.promises.readFile("package.json")).toString());
+            scope = pkg.name.slice(0, pkg.name.indexOf("/"));
             publishToGithub = publish && scope === ownerScope;
         }
         catch (_) {
@@ -7026,42 +7028,41 @@ async function npmConfig(registryUrl, token, message) {
             publishToGithub = false;
         }
         if (!publish) {
-            core.info('Publishing disabled, skipping publishing to package registries');
+            core.info("Publishing disabled, skipping publishing to package registries");
         }
         else {
-            scope !== ownerScope && core.warning(`Package not scoped with ${ownerScope}, skipping publishing to GitHub registry`);
+            scope !== ownerScope &&
+                core.warning(`Package not scoped with ${ownerScope}, skipping publishing to GitHub registry`);
         }
         try {
             await external_fs_.promises.access(`node_modules/${cli}/package.json`);
         }
         catch (_) {
             core.info(`Installing ${cli}...`);
-            await exec.exec('npm', [
-                'install',
+            await exec.exec("npm", [
+                "install",
                 cli,
-                '--no-save',
-                '--no-package-lock'
+                "--no-save",
+                "--no-package-lock",
             ]);
             core.info(`Installed ${cli}`);
         }
-        cliPath = `node_modules/${cli}/${JSON
-            .parse((await external_fs_.promises.readFile(`node_modules/${cli}/package.json`)).toString())
-            .bin[cli]}`;
-        await exec.exec('git', ['config', '--global', 'user.name', name]);
-        await exec.exec('git', ['config', '--global', 'user.email', email]);
-        core.info(`Creating release on GitHub${publishToGithub ? ' and publishing to GitHub registry' : ''}...`);
+        cliPath = `node_modules/${cli}/${JSON.parse((await external_fs_.promises.readFile(`node_modules/${cli}/package.json`)).toString()).bin[cli]}`;
+        await exec.exec("git", ["config", "--global", "user.name", name]);
+        await exec.exec("git", ["config", "--global", "user.email", email]);
+        core.info(`Creating release on GitHub${publishToGithub ? " and publishing to GitHub registry" : ""}...`);
         await release(cliPath, true, publishToGithub, message, {
             ...process.env,
             NPM_CONFIG_REGISTRY: `https://npm.pkg.github.com`,
             NPM_TOKEN: githubToken,
-            GITHUB_TOKEN: githubToken
+            GITHUB_TOKEN: githubToken,
         });
-        core.info('Release available on GitHub');
-        publishToGithub && core.info('Package available on GitHub registry');
+        core.info("Release available on GitHub");
+        publishToGithub && core.info("Package available on GitHub registry");
         if (push) {
-            core.info('Pushing changes to GitHub repository...');
-            await exec.exec('git', ['push']);
-            core.info('GitHub repository up to date');
+            core.info("Pushing changes to GitHub repository...");
+            await exec.exec("git", ["push"]);
+            core.info("GitHub repository up to date");
         }
     }
     catch (error) {
@@ -7073,39 +7074,35 @@ async function lernaRelease(path, release, publish, message, env = {}) {
     }
     if (publish) {
         const npmEnv = await npmConfig(env.NPM_CONFIG_REGISTRY, env.NPM_TOKEN, message);
-        await exec.exec('node', [
+        await exec.exec("node", [
             path,
-            'publish',
-            'from-package',
-            '--yes',
-            '--canary',
-            '--preid',
-            'test',
-            '--pre-dist-tag',
-            'test',
-            '--registry',
-            env.NPM_CONFIG_REGISTRY
+            "publish",
+            "from-package",
+            "--yes",
+            "--registry",
+            env.NPM_CONFIG_REGISTRY,
+            "--canary",
+            "--preid",
+            "test",
+            "--pre-dist-tag",
+            "test",
         ], {
-            env: { ...env, ...npmEnv }
+            env: { ...env, ...npmEnv },
         });
     }
 }
 async function semanticRelease(path, release, publish, message, env = {}) {
     if (release) {
-        await exec.exec('node', [
-            path,
-            '--no-ci',
-            '--extends',
-            __webpack_require__.ab + "release.config.js"
-        ], { env });
+        await exec.exec("node", [path, "--no-ci", "--extends", __webpack_require__.ab + "release.config.js"], { env });
     }
     if (publish) {
         const npmEnv = await npmConfig(env.NPM_CONFIG_REGISTRY, env.NPM_TOKEN, message);
-        await exec.exec('yarn', [
-            'publish',
-            '--non-interactive',
-            '--no-git-tag-version',
-            '--access', 'public'
+        await exec.exec("yarn", [
+            "publish",
+            "--non-interactive",
+            "--no-git-tag-version",
+            "--access",
+            "public",
         ], { env: { ...env, ...npmEnv } });
     }
 }
